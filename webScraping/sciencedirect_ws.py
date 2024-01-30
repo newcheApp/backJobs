@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import time
 
-
 # URL of ScienceAlert
 url = "https://www.sciencealert.com/"
 
@@ -74,6 +73,15 @@ news_array = []
 for url in article_urls:
     news_article = fetch_articles(url)
     news_array.append(news_article)
+
+# Connection URI of MongoDB
+uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+# Connect to the MongoDB client
+client = MongoClient(uri)
+# Select the database
+db = client['newcheDB']
+# Select the collection
+collection = db['unprocessedNews']
 
 print("Adding articles to MongoDB...")
 
