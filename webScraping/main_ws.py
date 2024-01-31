@@ -4,8 +4,8 @@ import sys
 
 print("Starting to Fetch News.\n")
 
-print("Fetching News in Science Direct.\n")
-subprocess.run([sys.executable, "webScraping\sciencedirect_ws.py"])
+print("Fetching News in Science Alert.\n")
+subprocess.run([sys.executable, "webScraping\sciencealert_ws.py"])
 
 print("\n" + "-"*100)
 print("Fetching News in Space News.\n")
