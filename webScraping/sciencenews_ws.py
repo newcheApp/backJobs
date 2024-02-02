@@ -3,6 +3,11 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
 import feedparser
+'''
+NOT DONE
+Do not know to add it or not
+'''
+
 
 # URL of the RSS feed
 feed_url = "https://www.sciencenews.org/feed"

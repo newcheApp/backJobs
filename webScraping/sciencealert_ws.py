@@ -66,14 +66,6 @@ def fetch_articles(url):
         print(f"Error fetching the page: {e}")
         return {"title": "Error", "url": "Error", "date": "Error", "content": "Error"}
 
-article_html_array = extract_articles(url)
-article_urls = extract_article_urls(article_html_array)
-news_array = []
-
-for url in article_urls:
-    news_article = fetch_articles(url)
-    news_array.append(news_article)
-
 # Connection URI of MongoDB
 uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
 # Connect to the MongoDB client
@@ -82,6 +74,26 @@ client = MongoClient(uri)
 db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
+
+
+article_html_array = extract_articles(url)
+all_article_urls = extract_article_urls(article_html_array)
+print("\n")
+
+article_urls = []
+
+for url in all_article_urls:
+    if not collection.find_one({"url": url}):
+        article_urls.append(url)
+        print("New url will be added: "+ url)
+    else:
+        print(f"URL already in database, skipping: {url}")
+
+news_array = []
+
+for url in article_urls:
+    news_article = fetch_articles(url)
+    news_array.append(news_article)
 
 print("Adding articles to MongoDB...")
 

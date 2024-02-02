@@ -7,18 +7,8 @@ import feedparser
 # URL of the RSS feed
 feed_url = "https://spacenews.com/section/news-archive/feed/"
 
-# Parse the feed
-feed = feedparser.parse(feed_url)
-
-print("Extracting article URLs...")
-# Extract and print article URLs
-article_urls = [entry.link for entry in feed.entries]
-
-for url in article_urls:
-    print("URL found: "+ url)
-
 def parse_article(url):
-    print(f"Fetching full article from {url}...")
+    print(f"\nFetching full article from {url}...")
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -55,7 +45,7 @@ def parse_article(url):
         
         print("Title: " + title)
         print("Date: " + date)
-        print("Content: " + content[:100] + "...\n")
+        print("Content: " + content[:100] + "...")
         
         return {
             'title': title,
@@ -68,15 +58,9 @@ def parse_article(url):
         print(f"Error fetching the page: {e}")
         return {"title": "Error", "url": "Error", "date": "Error", "content": "Error"}
 
-news_array = []
-# Itarate over articles
-for url in article_urls:
-    article_data = parse_article(url)
-    news_array.append(article_data)
-
 # Connection URI of MongoDB
 uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
-print("Connecting to MongoDB...")
+print("Connecting to MongoDB...\n")
 client = MongoClient(uri)
 
 # Select the database
@@ -84,6 +68,29 @@ db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
 
+# Parse the feed
+feed = feedparser.parse(feed_url)
+
+print("Extracting article URLs...\n")
+# Extract article URLs
+all_article_urls = [entry.link for entry in feed.entries]
+
+# Filter URLs: Only keep URLs not already present in the database
+article_urls = []
+for url in all_article_urls:
+    if not collection.find_one({"url": url}):
+        article_urls.append(url)
+        print("URL found: "+ url)
+    else:
+        print(f"URL already in database, skipping: {url}")
+        
+news_array = []
+# Itarate over articles
+for url in article_urls:
+    article_data = parse_article(url)
+    news_array.append(article_data)
+
+print("\n")
 for news_article in news_array:
     # Check if the article already exists in the collection
     existing_article = collection.find_one({"title": news_article['title']})
@@ -96,4 +103,4 @@ for news_article in news_array:
         print(f"Duplicate article found, skipping insertion: {news_article['title']}")
 
 client.close()
-print("Disconnected from MongoDB.")
+print("\nDisconnected from MongoDB.")
