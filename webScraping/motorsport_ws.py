@@ -28,31 +28,42 @@ def fetch_rss_feed(rss_url):
 def add_article_bodies(news_articles):
     headers = {'User-Agent': 'Mozilla/5.0'}
 
+def add_article_bodies(news_articles):
+    headers = {'User-Agent': 'Mozilla/5.0'}
+
     for article in news_articles:
         try:
             response = requests.get(article['url'], headers=headers)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find the main content of the article
-            article_body = soup.select_one('.ms-article__body, .ms-article__main')
-            text_content = ' '.join(p.get_text(strip=True) for p in article_body.find_all('p') if p.get_text(strip=True))
+            # Select the main content of the article more precisely
+            content_selector = '.ms-article__body, .ms-article__main'
+            article_body = soup.select_one(content_selector)
             
-            # Find the <h2> tag content and prepend it to the body text
-            h2_content = soup.select_one('.text-article-description.font.text-grey-800.mb-6').get_text(strip=True) if soup.select_one('.text-article-description.font.text-grey-800.mb-6') else ''
-            full_content = f"{h2_content} {text_content}"
+            # Exclude parts under the photos identified by their class names
+            for excluded_section in article_body.select('.title, .photographer'):
+                excluded_section.decompose()
             
-            article['body'] = ' '.join(full_content.split())
+            # Optionally, remove other unwanted sections from the article_body
+            for unwanted_section in article_body.select('.relatedContent, .another-unwanted-class'):
+                unwanted_section.decompose()
+            
+            # Extract text content, excluding unwanted parts
+            text_content = ' '.join(p.get_text(strip=True) for p in article_body.find_all('p', recursive=False) if p.get_text(strip=True))
+            
+            article['body'] = ' '.join(text_content.split())
 
             print(f"Title: {article['title']}")
             print(f"Date: {article['date']}")
             print(f"url: {article['url']}")
             print(f"Content: {article['body'][:100]}...\n")
 
-            
         except Exception as e:
             print(f"Failed to fetch or parse article at {article['url']}: {e}")
             article['body'] = "Could not fetch the content"
+
+
 
 
 # Connect to the MongoDB client
