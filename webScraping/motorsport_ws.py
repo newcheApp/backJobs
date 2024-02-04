@@ -3,6 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
+import io
+from PIL import Image
+from bson.binary import Binary
 
 rss_url = 'https://www.motorsport.com/rss/all/news/'
 # Connection URI of MongoDB
@@ -20,13 +23,30 @@ def fetch_rss_feed(rss_url):
             'title': entry.title,
             'url': entry.link,
             'date': published_date,
-            'body': ''  # Placeholder for the body content
+            'body': '',  # Placeholder for the body content
+            'image_url': ''  # Placeholder for image URL
         })
         
     return news_articles
 
-def add_article_bodies(news_articles):
-    headers = {'User-Agent': 'Mozilla/5.0'}
+def download_and_process_image(image_url):
+    print(f"--- Downloading Image: {image_url} ---")
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        image = Image.open(io.BytesIO(response.content))
+        
+        # Convert image to RGB if it's not already in that mode
+        if image.mode != 'RGB':
+            print("Image is not in RGB mode. Converting...")
+            image = image.convert('RGB')
+        
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        print("Image downloaded and processed successfully.")
+        return img_byte_arr.getvalue()
+    else:
+        print(f"Failed to download image: {image_url}")
+        return None
 
 def add_article_bodies(news_articles):
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -37,33 +57,34 @@ def add_article_bodies(news_articles):
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Select the main content of the article more precisely
-            content_selector = '.ms-article__body, .ms-article__main'
-            article_body = soup.select_one(content_selector)
+            # Find the main content of the article
+            article_body = soup.select_one('.ms-article__body, .ms-article__main')
+            text_content = ' '.join(p.get_text(strip=True) for p in article_body.find_all('p') if p.get_text(strip=True))
             
-            # Exclude parts under the photos identified by their class names
-            for excluded_section in article_body.select('.title, .photographer'):
-                excluded_section.decompose()
+            # Find the <h2> tag content and prepend it to the body text
+            h2_content = soup.select_one('.text-article-description.font.text-grey-800.mb-6').get_text(strip=True) if soup.select_one('.text-article-description.font.text-grey-800.mb-6') else ''
+            full_content = f"{h2_content} {text_content}"
             
-            # Optionally, remove other unwanted sections from the article_body
-            for unwanted_section in article_body.select('.relatedContent, .another-unwanted-class'):
-                unwanted_section.decompose()
-            
-            # Extract text content, excluding unwanted parts
-            text_content = ' '.join(p.get_text(strip=True) for p in article_body.find_all('p', recursive=False) if p.get_text(strip=True))
-            
-            article['body'] = ' '.join(text_content.split())
+            article['body'] = ' '.join(full_content.split())
+
+            # Find and process the image
+            picture_tag = soup.find('picture')
+            image_tag = picture_tag.find('img') if picture_tag else None
+            if image_tag:
+                image_url = image_tag.get('src')
+                image_data = download_and_process_image(image_url)
+                article['image_url'] = image_url
+                article['image_data'] = Binary(image_data) if image_data else None
 
             print(f"Title: {article['title']}")
             print(f"Date: {article['date']}")
             print(f"url: {article['url']}")
             print(f"Content: {article['body'][:100]}...\n")
 
+            
         except Exception as e:
             print(f"Failed to fetch or parse article at {article['url']}: {e}")
             article['body'] = "Could not fetch the content"
-
-
 
 
 # Connect to the MongoDB client
@@ -86,11 +107,8 @@ for article in articles:
     else:
         print(f"Article already in database, skipping: {article['title']}")
 
-
 add_article_bodies(news_articles)
 
-
-    
 print("\nAdding articles to MongoDB...\n")
 
 for news_article in news_articles:

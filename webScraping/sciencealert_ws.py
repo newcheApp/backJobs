@@ -58,13 +58,33 @@ def fetch_articles(url):
         article_section = soup.find('article')
         article_text = article_section.get_text(separator=' ', strip=True) if article_section else "No content found"
 
-        news = {"title": title, "url": url, "date": date, "content": article_text}
+        # Extract the article's image
+        img_tag = soup.find('meta', {'property': 'og:image'})
+        img_url = img_tag['content'] if img_tag else None
+        img_data = requests.get(img_url).content if img_url else None
+
+        news = {
+            "title": title,
+            "url": url,
+            "date": date,
+            "body": article_text,
+            "img_url": img_url,
+            "img_data": img_data
+        }
         print(f"Article fetched successfully: {title}")
         return news
 
     except requests.RequestException as e:
         print(f"Error fetching the page: {e}")
-        return {"title": "Error", "url": "Error", "date": "Error", "content": "Error"}
+        return {
+            "title": "Error",
+            "url": "Error",
+            "date": "Error",
+            "body": "Error",
+            "img_url": None,
+            "img_data": None
+        }
+
 
 # Connection URI of MongoDB
 uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"

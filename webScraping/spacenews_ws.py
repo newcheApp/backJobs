@@ -1,97 +1,118 @@
+import feedparser
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
-import feedparser
+import io
+from PIL import Image
+from bson.binary import Binary
 
-# URL of the RSS feed
-feed_url = "https://spacenews.com/section/news-archive/feed/"
-
-def parse_article(url):
-    print(f"\nFetching full article from {url}...")
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-    
-        # List of possible selectors for the title, ordered by priority
-        title_selectors = [
-            {'tag': 'h1', 'class': 'entry-title entry-title--with-subtitle'},  # Original class
-            {'tag': 'h1', 'class': 'entry-title'},  # Class observed in your snippet
-            # Add more selectors as needed
-        ]
-
-        title_tag = None
-
-        # Try each selector until the title is found
-        for selector in title_selectors:
-            if selector['class']:
-                title_tag = soup.find(selector['tag'], class_=selector['class'])
-            else:
-                title_tag = soup.find(selector['tag'])
-            if title_tag:
-                break  # Stop the loop if a title is found
-
-        title = title_tag.text.strip() if title_tag else 'Title Not Found'
-
-        # Extract the publication date with error handling
-        date_tag = soup.find('time', class_='entry-date published')
-        date = date_tag['datetime'].strip() if date_tag else 'Date Not Found'
-
-        # Extract the article content
-        article_content = soup.find('div', class_='entry-content')
-        paragraphs = article_content.find_all('p') if article_content else []
-        content = '\n'.join(paragraph.text.strip() for paragraph in paragraphs)
-        
-        print("Title: " + title)
-        print("Date: " + date)
-        print("Content: " + content[:100] + "...")
-        
-        return {
-            'title': title,
-            'url': url,
-            'date': date,
-            'content': content,
-        }
-        print(f"Article fetched successfully: {title}")
-    except requests.RequestException as e:
-        print(f"Error fetching the page: {e}")
-        return {"title": "Error", "url": "Error", "date": "Error", "content": "Error"}
-
+rss_url = 'https://www.motorsport.com/rss/all/news/'
 # Connection URI of MongoDB
 uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
-print("Connecting to MongoDB...\n")
-client = MongoClient(uri)
 
+def fetch_rss_feed(rss_url):
+    # Parse the RSS feed
+    feed = feedparser.parse(rss_url)
+    news_articles = []
+
+    for entry in feed.entries:
+        print(f"Article Found: {entry.title}")
+        published_date = datetime(*entry.published_parsed[:6]).strftime('%Y-%m-%d %H:%M:%S')
+        news_articles.append({
+            'title': entry.title,
+            'url': entry.link,
+            'date': published_date,
+            'body': '',  # Placeholder for the body content
+            'image_url': ''  # Placeholder for image URL
+        })
+        
+    return news_articles
+
+def download_and_process_image(image_url):
+    print(f"--- Downloading Image: {image_url} ---")
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        image = Image.open(io.BytesIO(response.content))
+        
+        # Convert image to RGB if it's not already in that mode
+        if image.mode != 'RGB':
+            print("Image is not in RGB mode. Converting...")
+            image = image.convert('RGB')
+        
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        print("Image downloaded and processed successfully.")
+        return img_byte_arr.getvalue()
+    else:
+        print(f"Failed to download image: {image_url}")
+        return None
+
+def add_article_bodies(news_articles):
+    headers = {'User-Agent': 'Mozilla/5.0'}
+
+    for article in news_articles:
+        try:
+            response = requests.get(article['url'], headers=headers)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Find the main content of the article
+            article_body = soup.select_one('.ms-article__body, .ms-article__main')
+            text_content = ' '.join(p.get_text(strip=True) for p in article_body.find_all('p') if p.get_text(strip=True))
+            
+            # Find the <h2> tag content and prepend it to the body text
+            h2_content = soup.select_one('.text-article-description.font.text-grey-800.mb-6').get_text(strip=True) if soup.select_one('.text-article-description.font.text-grey-800.mb-6') else ''
+            full_content = f"{h2_content} {text_content}"
+            
+            article['body'] = ' '.join(full_content.split())
+
+            # Find and process the image
+            picture_tag = soup.find('picture')
+            image_tag = picture_tag.find('img') if picture_tag else None
+            if image_tag:
+                image_url = image_tag.get('src')
+                image_data = download_and_process_image(image_url)
+                article['image_url'] = image_url
+                article['image_data'] = Binary(image_data) if image_data else None
+
+            print(f"Title: {article['title']}")
+            print(f"Date: {article['date']}")
+            print(f"url: {article['url']}")
+            print(f"Content: {article['body'][:100]}...")
+            print(f"Image URL: {article['image_url']}...")
+            print(f"Content: {article['image_data'][:100]}...\n")
+            
+        except Exception as e:
+            print(f"Failed to fetch or parse article at {article['url']}: {e}")
+            article['body'] = "Could not fetch the content"
+
+
+# Connect to the MongoDB client
+client = MongoClient(uri)
 # Select the database
 db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
 
-# Parse the feed
-feed = feedparser.parse(feed_url)
-
-print("Extracting article URLs...\n")
-# Extract article URLs
-all_article_urls = [entry.link for entry in feed.entries]
-
-# Filter URLs: Only keep URLs not already present in the database
-article_urls = []
-for url in all_article_urls:
-    if not collection.find_one({"url": url}):
-        article_urls.append(url)
-        print("URL found: "+ url)
-    else:
-        print(f"URL already in database, skipping: {url}")
-        
-news_array = []
-# Itarate over articles
-for url in article_urls:
-    article_data = parse_article(url)
-    news_array.append(article_data)
+articles = fetch_rss_feed(rss_url)
 
 print("\n")
-for news_article in news_array:
+news_articles = []
+
+for article in articles:
+    # Check using 'url' as the key for consistency with database storage
+    if not collection.find_one({'url': article['url']}):
+        news_articles.append(article)
+        print("New article found: "+ article['title'])
+    else:
+        print(f"Article already in database, skipping: {article['title']}")
+
+add_article_bodies(news_articles)
+
+print("\nAdding articles to MongoDB...\n")
+
+for news_article in news_articles:
     # Check if the article already exists in the collection
     existing_article = collection.find_one({"title": news_article['title']})
     if not existing_article:
