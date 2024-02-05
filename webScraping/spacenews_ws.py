@@ -30,6 +30,10 @@ def fetch_rss_feed(rss_url):
     return news_articles
 
 def download_and_process_image(image_url):
+    
+    if image_url.startswith('//'):
+        image_url = 'https:' + image_url
+
     print(f"--- Downloading Image: {image_url} ---")
     response = requests.get(image_url)
     if response.status_code == 200:

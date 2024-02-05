@@ -61,6 +61,8 @@ def fetch_articles(url):
         # Extract the article's image
         img_tag = soup.find('meta', {'property': 'og:image'})
         img_url = img_tag['content'] if img_tag else None
+        if img_url.startswith('//'):
+            img_url = 'https:' + img_url
         img_data = requests.get(img_url).content if img_url else None
 
         news = {

@@ -30,6 +30,10 @@ def fetch_rss_feed(rss_url):
     return news_articles
 
 def download_and_process_image(image_url):
+    # Check if the image URL starts with '//' and prepend 'https:' to it
+    if image_url.startswith('//'):
+        image_url = 'https:' + image_url
+
     print(f"--- Downloading Image: {image_url} ---")
     response = requests.get(image_url)
     if response.status_code == 200:
@@ -47,6 +51,7 @@ def download_and_process_image(image_url):
     else:
         print(f"Failed to download image: {image_url}")
         return None
+
 
 def add_article_bodies(news_articles):
     headers = {'User-Agent': 'Mozilla/5.0'}
