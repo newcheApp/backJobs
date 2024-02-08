@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import re
 
 # Load the BART model and tokenizer
-print(">>> Load the BART model and tokenizer...")
+print(">>> Loading the BART model and tokenizer...")
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
 model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
 
