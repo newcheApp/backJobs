@@ -22,4 +22,5 @@ print("\n" + "-"*100)
 print("> Adding summaries of news...\n")
 subprocess.run([sys.executable, "contentProcessing\summurization.py"])
 
-print("\nNews Fetching end.\n")
+print("\n> News Fetching end...")
+print("\n> End of Back Processes...")
