@@ -47,7 +47,7 @@ for document in collection.find({'$or': [{'summary': {'$exists': False}}, {'summ
         if 'body' in document:
             summary = attempt_summarization(document['body'])
             if summary:
-                collection.update_one({'_id': document['_id']}, {'$set': {'summary': summary, 'tags': []}})
+                collection.update_one({'_id': document['_id']}, {'$set': {'summary': summary}})
                 print(f">>> {docs_to_summarize_count} - Updated document {document['_id']} with summary...")
             else:
                 print(f">>> {docs_to_summarize_count} - Could not generate summary for document {document['_id']}...")
