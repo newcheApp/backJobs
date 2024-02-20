@@ -1,12 +1,13 @@
+'''
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
 import feedparser
-'''
+
 NOT DONE
 Do not know to add it or not
-'''
+
 
 
 # URL of the RSS feed
@@ -78,3 +79,5 @@ news_array = []
 for url in article_urls:
     article_data = parse_article(url)
     news_array.append(article_data)
+    
+'''

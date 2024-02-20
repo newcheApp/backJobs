@@ -1,20 +1,21 @@
 # import subprocess module
 import subprocess
 import sys
+import os
 
-print("> Starting to Fetch News...\n")
+def fetch_news_from_directory(directory_path):
+    print("> Starting to Fetch News...\n")
 
-print("> Fetching News in Science Alert...\n")
-subprocess.run([sys.executable, "webScraping\sciencealert_ws.py"])
+    # Iterate over the files in the specified directory
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".py"):  # Check if the file is a Python file
+            file_path = os.path.join(directory_path, filename)
+            print(f"\n{'-'*100}\n> Fetching News from {filename}...\n")
+            
+            # Run the Python script
+            subprocess.run([sys.executable, file_path])
 
-print("\n" + "-"*100)
-print("> Fetching News in Space News...\n")
-subprocess.run([sys.executable, "webScraping\spacenews_ws.py"])
-
-print("\n" + "-"*100)
-print("> Fetching News in Motorsports...\n")
-subprocess.run([sys.executable, "webScraping\motorsport_ws.py"])
-
+fetch_news_from_directory("webScraping")
 
 # And new websites before this line ^
 # Adding summaries
