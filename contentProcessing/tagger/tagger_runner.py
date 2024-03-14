@@ -28,5 +28,7 @@ def check_for_untagged_news():
 while check_for_untagged_news():
     subprocess.run([python_interpreter, script_relative_path])
     print("Completed one execution cycle. Checking for more untagged news...")
+    print("-"*101)
+    print("-"*101)
 
 print("No more untagged news items found. Exiting.")

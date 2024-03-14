@@ -96,6 +96,7 @@ client = MongoClient(uri)
 db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
+url_check = db['news']
 
 
 article_html_array = extract_articles(url)
@@ -105,7 +106,7 @@ print("\n")
 article_urls = []
 
 for url in all_article_urls:
-    if not collection.find_one({"url": url}):
+    if not url_check.find_one({"url": url}):
         article_urls.append(url)
         print("New url will be added: "+ url)
     else:

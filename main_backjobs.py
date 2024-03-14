@@ -21,7 +21,11 @@ fetch_news_from_directory("webScraping")
 # Adding summaries
 print("\n" + "-"*100)
 print("> Adding summaries of news...\n")
-subprocess.run([sys.executable, "contentProcessing\summurization.py"])
+subprocess.run([sys.executable, "contentProcessing/summurization.py"])
+print("> Tagger started...")
+subprocess.run([sys.executable, "contentProcessing/tagger/tagger_runner.py"])
+print("> Mover started...")
+subprocess.run([sys.executable, "contentProcessing/news_mover.py"])
 
 print("\n> News Fetching end...")
 print("\n> End of Back Processes...")

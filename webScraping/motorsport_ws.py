@@ -98,6 +98,7 @@ client = MongoClient(uri)
 db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
+url_check = db['news']
 
 articles = fetch_rss_feed(rss_url)
 
@@ -106,7 +107,7 @@ news_articles = []
 
 for article in articles:
     # Check using 'url' as the key for consistency with database storage
-    if not collection.find_one({'url': article['url']}):
+    if not url_check.find_one({'url': article['url']}):
         news_articles.append(article)
         print("New article found: "+ article['title'])
     else:
