@@ -17,7 +17,6 @@ def fetch_news_from_directory(directory_path):
 
 fetch_news_from_directory("webScraping")
 
-# And new websites before this line ^
 # Adding summaries
 print("\n" + "-"*100)
 print("\n> Adding summaries of news...\n")
