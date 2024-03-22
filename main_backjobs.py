@@ -28,3 +28,4 @@ subprocess.run([sys.executable, "contentProcessing/news_mover.py"])
 
 print("\n> News Fetching end...")
 print("\n> End of Back Processes...")
+
