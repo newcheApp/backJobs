@@ -12,6 +12,7 @@ uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
 client = MongoClient(uri)
 db = client['newcheDB']
 collection = db['unprocessedNews']
+url_check = db['news']
 
 feed_url = "https://spacenews.com/section/news-archive/feed/"
 
@@ -78,7 +79,7 @@ feed = feedparser.parse(feed_url)
 
 # Extract and process articles
 all_article_urls = [entry.link for entry in feed.entries]
-article_urls = [url for url in all_article_urls if not collection.find_one({"url": url})]
+article_urls = [url for url in all_article_urls if not url_check.find_one({"url": url})]
 
 news_array = [parse_article(url) for url in article_urls]
 

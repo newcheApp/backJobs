@@ -1,26 +1,33 @@
 # import subprocess module
 import subprocess
 import sys
+import os
 
-print("> Starting to Fetch News...\n")
+def fetch_news_from_directory(directory_path):
+    print("> Starting to Fetch News...\n")
 
-print("> Fetching News in Science Alert...\n")
-subprocess.run([sys.executable, "webScraping\sciencealert_ws.py"])
+    # Iterate over the files in the specified directory
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".py"):  # Check if the file is a Python file
+            file_path = os.path.join(directory_path, filename)
+            print(f"\n{'-'*100}\n> Fetching News from {filename}...\n")
+            
+            # Run the Python script
+            subprocess.run([sys.executable, file_path])
 
-print("\n" + "-"*100)
-print("> Fetching News in Space News...\n")
-subprocess.run([sys.executable, "webScraping\spacenews_ws.py"])
+fetch_news_from_directory("webScraping")
 
-print("\n" + "-"*100)
-print("> Fetching News in Motorsports...\n")
-subprocess.run([sys.executable, "webScraping\motorsport_ws.py"])
-
-
-# And new websites before this line ^
 # Adding summaries
 print("\n" + "-"*100)
-print("> Adding summaries of news...\n")
-subprocess.run([sys.executable, "contentProcessing\summurization.py"])
+print("\n> Adding summaries of news...\n")
+subprocess.run([sys.executable, "contentProcessing/summurization.py"])
+print("\n> Tagger started...")
+subprocess.run([sys.executable, "contentProcessing/tagger/tagger_runner.py"])
+print("\n> Mover started...")
+subprocess.run([sys.executable, "contentProcessing/news_mover.py"])
+print("\n> Date Modifier started...")
+subprocess.run([sys.executable, "dateModifier.py"])
 
 print("\n> News Fetching end...")
 print("\n> End of Back Processes...")
+

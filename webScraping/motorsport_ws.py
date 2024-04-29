@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 import feedparser
 import requests
 from bs4 import BeautifulSoup
@@ -12,10 +19,20 @@ rss_url = 'https://www.motorsport.com/rss/all/news/'
 uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
 
 def fetch_rss_feed(rss_url):
+    # Set custom headers
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+
+    # Fetch the feed content using requests with headers
+    response = requests.get(rss_url, headers=headers)
+    feed_content = response.content
+
     # Parse the RSS feed
-    feed = feedparser.parse(rss_url)
+    feed = feedparser.parse(feed_content)
     news_articles = []
 
+    # Iterate over each entry in the RSS feed
     for entry in feed.entries:
         print(f"Article Found: {entry.title}")
         published_date = datetime(*entry.published_parsed[:6]).strftime('%Y-%m-%d %H:%M:%S')
@@ -54,7 +71,9 @@ def download_and_process_image(image_url):
 
 
 def add_article_bodies(news_articles):
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
 
     for article in news_articles:
         try:
@@ -98,6 +117,7 @@ client = MongoClient(uri)
 db = client['newcheDB']
 # Select the collection
 collection = db['unprocessedNews']
+url_check = db['news']
 
 articles = fetch_rss_feed(rss_url)
 
@@ -106,7 +126,7 @@ news_articles = []
 
 for article in articles:
     # Check using 'url' as the key for consistency with database storage
-    if not collection.find_one({'url': article['url']}):
+    if not url_check.find_one({'url': article['url']}):
         news_articles.append(article)
         print("New article found: "+ article['title'])
     else:
