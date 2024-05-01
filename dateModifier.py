@@ -34,5 +34,8 @@ for document in all_documents:
         # Skip updating if the date is not a string
         print(f"No update needed for document {document['_id']}; date is not a string.")
 
+
 # Close the MongoDB connection
 client.close()
+
+
