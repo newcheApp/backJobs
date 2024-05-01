@@ -6,10 +6,14 @@ import time
 # URL of ScienceAlert
 url = "https://www.sciencealert.com/"
 
-def extract_articles(url):
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
+
+def extract_articles(url, ):
     print(f"Fetching articles from {url}...")
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -47,7 +51,7 @@ def extract_article_urls(article_html_array, max_retries=3):
 def fetch_articles(url):
     print(f"Fetching full article from {url}...")
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         html_content = response.text
 

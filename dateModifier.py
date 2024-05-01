@@ -17,8 +17,8 @@ for document in all_documents:
     # Check if the date field is a string
     if isinstance(original_date, str):
         try:
-            # Attempt to parse the date string to a datetime object using the known format
-            new_date = datetime.datetime.strptime(original_date, '%Y-%m-%d %H:%M:%S')
+            # Attempt to parse the date string to a datetime object assuming ISO 8601 format
+            new_date = datetime.datetime.fromisoformat(original_date.rstrip('Z'))
             
             # Update the date field in the database with the new datetime object
             news_collection.update_one(
