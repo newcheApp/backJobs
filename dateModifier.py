@@ -4,7 +4,7 @@ import datetime
 # Establish the database connection
 client = MongoClient("mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB")
 db = client['newcheDB']
-news_collection = db['news']
+news_collection = db['unprocessedNews']
 
 # Fetch all documents in the collection
 all_documents = news_collection.find()

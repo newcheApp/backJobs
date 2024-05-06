@@ -23,10 +23,11 @@ print("\n> Adding summaries of news...\n")
 subprocess.run([sys.executable, "contentProcessing/summurization.py"])
 print("\n> Tagger started...")
 subprocess.run([sys.executable, "contentProcessing/tagger/tagger_runner.py"])
-print("\n> Mover started...")
-subprocess.run([sys.executable, "contentProcessing/news_mover.py"])
 print("\n> Date Modifier started...")
 subprocess.run([sys.executable, "dateModifier.py"])
+print("\n> Mover started...")
+subprocess.run([sys.executable, "contentProcessing/news_mover.py"])
+
 
 print("\n> News Fetching end...")
 print("\n> End of Back Processes...")
