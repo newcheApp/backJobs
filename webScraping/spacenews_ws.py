@@ -83,6 +83,8 @@ article_urls = [url for url in all_article_urls if not url_check.find_one({"url"
 
 news_array = [parse_article(url) for url in article_urls]
 
+print("\n"+"-"*100+"\n")
+
 # Save articles to MongoDB
 for news_article in news_array:
     if news_article and not collection.find_one({"title": news_article['title']}):
