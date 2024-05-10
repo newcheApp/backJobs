@@ -74,7 +74,7 @@ def fetch_articles(url):
             "url": url,
             "date": date,
             "body": article_text,
-            "img_url": img_url,
+            "image_url": img_url,
             "img_data": img_data
         }
         print(f"Article fetched successfully: {title}")
@@ -87,7 +87,7 @@ def fetch_articles(url):
             "url": "Error",
             "date": "Error",
             "body": "Error",
-            "img_url": None,
+            "image_url": None,
             "img_data": None
         }
 
