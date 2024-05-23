@@ -51,8 +51,12 @@ for item in unprocessedNews.find():
         item['tags'] = processed_tags
         item['_class'] = "com.newche.model.News"
         
-        # Insert the processed item into the news collection
-        news.insert_one(item)
+        # Create a copy of the item without the 'body' field for insertion into the news collection
+        item_copy = item.copy()
+        item_copy.pop('body', None)
+        
+        # Insert the processed item (without body) into the news collection
+        news.insert_one(item_copy)
         print(f"Processed and inserted news item: '{item['title']}' with ID: {item['_id']}")
 
         # Delete the processed item from unprocessedNews
@@ -61,6 +65,6 @@ for item in unprocessedNews.find():
         print("-"*100)
         
         # Exit the loop after processing the first item
-        
+        break
 
 print("Processing completed for news item.")
