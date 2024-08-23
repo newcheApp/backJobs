@@ -2,7 +2,7 @@ from pymongo import MongoClient
 import datetime
 
 # Establish the database connection
-client = MongoClient("mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB")
+client = MongoClient("../newcheDB")
 db = client['newcheDB']
 news_collection = db['unprocessedNews']
 
