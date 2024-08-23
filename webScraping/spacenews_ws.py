@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Connection URI of MongoDB
-uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+uri = ".../newcheDB"
 client = MongoClient(uri)
 db = client['newcheDB']
 collection = db['unprocessedNews']

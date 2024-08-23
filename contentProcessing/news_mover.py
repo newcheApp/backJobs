@@ -2,7 +2,7 @@ from pymongo import MongoClient, errors
 from bson import DBRef
 
 # Connection details
-mongo_uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+mongo_uri = ".../newcheDB"
 client = MongoClient(mongo_uri)
 
 # Database and collection handles

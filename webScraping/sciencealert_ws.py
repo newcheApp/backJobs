@@ -93,7 +93,7 @@ def fetch_articles(url):
 
 
 # Connection URI of MongoDB
-uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+uri = ".../newcheDB"
 # Connect to the MongoDB client
 client = MongoClient(uri)
 # Select the database

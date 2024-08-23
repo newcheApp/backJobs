@@ -36,7 +36,7 @@ model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
 
 # MongoDB setup
 print(">>> Connecting to MongoDB...")
-uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+uri = ".../newcheDB"
 client = MongoClient(uri)
 db = client['newcheDB']
 collection = db['unprocessedNews']

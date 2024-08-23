@@ -9,7 +9,7 @@ from bson.binary import Binary
 
 rss_url = 'https://www.motorsport.com/rss/all/news/'
 # Connection URI of MongoDB
-uri = "mongodb://egemenNewcheAdmin:passNewche@localhost:27017/newcheDB"
+uri = ".../newcheDB"
 
 def fetch_rss_feed(rss_url):
     # Set custom headers
